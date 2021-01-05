@@ -4,7 +4,9 @@ Storage.js - the smallest, lightweight library to interactive with LocalStorage 
 ## Init
 All data's are stocked in one localStorage key. By default localStorage key name is storage.js
 ```javascript
-storage.init("Storage name");
+storage.init("Storage name", "local");
+
+// 2 argument is optional (local || session), by default is local
 ```
 
 ## Get all data
@@ -35,6 +37,11 @@ storage.get(key);
 `key` (string) &mdash; key value.
 ```javascript
 storage.remove(key);
+```
+## Transfer data from sessionStorage to localStorage and conversely
+`to` (string) &mdash; transfer data to ("local" || "session").
+```javascript
+storage.transfer(to);
 ```
 In all functions, `key` can also contain multiple object location.
 E.g. `someKey`, `user.name`, `user.settings.theme`
