@@ -6,7 +6,7 @@ All data's are stocked in one localStorage key. By default localStorage key name
 ```javascript
 storage.init("Storage name", "local");
 
-// 2 argument is optional (local || session), by default is local
+// Seccond argument is optional (local || session), by default is local
 ```
 
 ## Get all data
