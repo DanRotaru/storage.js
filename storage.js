@@ -1,15 +1,18 @@
 /**
  * storage.js — lightweight localstorage API library
  * Copyright: by DanRotaru <https://t.me/danrotaru>
+ * Github: <https://github.com/DanRotaru/storage.js>
  * License: Free to use
  */
 
 const storage = {
     name: 'storage.js',
     raw: null,
-    init: function (name) {
+    type: localStorage,
+    init: function (name, type = 'local') {
         this.name = name;
-        this.raw = localStorage.getItem(this.name);
+        if(type !== 'local') this.type = sessionStorage;
+        this.raw = this.type.getItem(this.name);
     },
     json: function () {
         let json = typeof this.raw == 'object' ? JSON.parse(JSON.stringify(this.raw)) : JSON.parse(this.raw);
@@ -29,7 +32,7 @@ const storage = {
         }
         obj[keys[lastKeyIndex]] = val;
 
-        localStorage.setItem(this.name, JSON.stringify(t));
+        this.type.setItem(this.name, JSON.stringify(t));
         this.raw = JSON.stringify(t);
     },
     add: function(val, key) {
@@ -50,7 +53,7 @@ const storage = {
         }
         delete obj[keys[lastKeyIndex]];
 
-        localStorage.setItem(this.name, JSON.stringify(t));
+        this.type.setItem(this.name, JSON.stringify(t));
         this.raw = JSON.stringify(t);
     },
     get: function (key) {
@@ -67,5 +70,18 @@ const storage = {
         }
 
         return t[keys[lastKeyIndex]];
+    },
+    transfer: function(to){
+        if (this.raw === null) return false;
+
+        if(to == 1 || to == 'local'){
+            sessionStorage.removeItem(this.name);
+            localStorage.setItem(this.name, this.raw);
+        }
+        else if(to == 2 || to == 'session'){
+            localStorage.removeItem(this.name);
+            sessionStorage.setItem(this.name, this.raw);
+        }
+        
     }
 }
