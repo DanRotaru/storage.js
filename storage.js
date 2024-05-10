@@ -6,82 +6,49 @@
  */
 
 const storage = {
-    name: 'storage.js',
-    raw: null,
-    type: localStorage,
-    init: function (name, type = 'local') {
-        this.name = name;
-        if(type !== 'local') this.type = sessionStorage;
-        this.raw = this.type.getItem(this.name);
-    },
-    json: function () {
-        let json = typeof this.raw == 'object' ? JSON.parse(JSON.stringify(this.raw)) : JSON.parse(this.raw);
-        return json;
-    },
-    update: function (val, key) {
-        let t = this.json() || {};
+  name: 'storage.js',
+  data: {},
 
-        let obj = t;
-        let keys = key.split('.');
-        let lastKeyIndex = keys.length - 1;
+  init(name) {
+    name ? this.name = name : null;
+    const storedData = localStorage.getItem(this.name);
+    this.data = storedData ? JSON.parse(storedData) : {};
+  },
 
-        for (let i = 0; i < lastKeyIndex; ++i) {
-            key = keys[i];
-            !(key in obj) && (obj[key] = {});
-            obj = obj[key];
-        }
-        obj[keys[lastKeyIndex]] = val;
+  get(key) {
+    return key.split('.').reduce((result, k) => result && result[k], this.data);
+  },
 
-        this.type.setItem(this.name, JSON.stringify(t));
-        this.raw = JSON.stringify(t);
-    },
-    add: function(val, key) {
-        this.update(val, key);
-    },
-    remove: function (key) {
-        if (this.raw === null) return false;
+  set(key, value) {
+    const keys = key.split('.');
+    const lastKey = keys.pop();
+    const obj = keys.reduce((acc, k) => acc[k] ?? (acc[k] = {}), this.data);
+    obj[lastKey] = value;
 
-        let t = this.json();
-        let obj = t;
-        let keys = key.split('.');
-        let lastKeyIndex = keys.length - 1;
+    localStorage.setItem(this.name, JSON.stringify(this.data));
+  },
 
-        for (let i = 0; i < lastKeyIndex; ++i) {
-            key = keys[i];
-            !(key in obj) && (obj[key] = {});
-            obj = obj[key];
-        }
-        delete obj[keys[lastKeyIndex]];
+  update(key, value) {
+    this.set(key, value);
+  },
 
-        this.type.setItem(this.name, JSON.stringify(t));
-        this.raw = JSON.stringify(t);
-    },
-    get: function (key) {
-        if (this.raw === null) return false;
-
-        let t = this.json();
-        let keys = key.split('.');
-        let lastKeyIndex = keys.length - 1;
-
-        for (let i = 0; i < lastKeyIndex; ++i) {
-            key = keys[i];
-            !(key in t) && (t[key] = {});
-            t = t[key];
-        }
-
-        return t[keys[lastKeyIndex]];
-    },
-    transfer: function(to){
-        if (this.raw === null) return false;
-
-        if(to == 1 || to == 'local'){
-            sessionStorage.removeItem(this.name);
-            localStorage.setItem(this.name, this.raw);
-        }
-        else if(to == 2 || to == 'session'){
-            localStorage.removeItem(this.name);
-            sessionStorage.setItem(this.name, this.raw);
-        }
-        
+  remove(key) {
+    const keys = key.split('.');
+    const lastKey = keys.pop();
+    const obj = keys.reduce((acc, k) => acc && acc[k], this.data);
+    if (obj && obj.hasOwnProperty(lastKey)) {
+      delete obj[lastKey];
     }
-}
+
+    localStorage.setItem(this.name, JSON.stringify(this.data));
+  },
+
+  clear() {
+    this.data = {};
+
+    localStorage.removeItem(this.name);
+  }
+};
+
+export default storage;
+
